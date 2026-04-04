@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>ShiftShield — Rider Protection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Instrument Sans',sans-serif;background:#f4f6f5;color:#111c18;min-height:100vh;display:flex;justify-content:center;}
+#app{width:100%;max-width:420px;min-height:100vh;background:#f4f6f5;position:relative;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* LOGIN */
+#loginScreen{min-height:100vh;background:linear-gradient(160deg,#0a1f18 0%,#0d2d22 45%,#0a6644 100%);display:flex;flex-direction:column;overflow:hidden;}
+.login-top{padding:52px 26px 30px;position:relative;}
+.login-top::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(13,155,108,0.3) 0%,transparent 70%);border-radius:50%;}
+.brand-row{display:flex;align-items:center;gap:10px;margin-bottom:34px;}
+.brand-ico{width:40px;height:40px;background:#0d9b6c;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 20px rgba(13,155,108,0.4);}
+.brand-txt{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;}
+.brand-txt span{color:#5deabc;}
+.hero-h{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:#fff;line-height:1.1;letter-spacing:-1px;margin-bottom:12px;}
+.hero-h em{font-style:normal;color:#5deabc;}
+.hero-s{color:rgba(255,255,255,0.55);font-size:13px;line-height:1.5;}
+.login-form{background:#fff;border-radius:24px 24px 0 0;flex:1;padding:30px 22px 48px;margin-top:auto;}
+.f-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:#111c18;margin-bottom:22px;}
+.f-group{margin-bottom:15px;}
+.f-label{display:block;font-size:11px;font-weight:600;color:#6b7c76;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;}
+.f-input{width:100%;padding:13px 15px;border:1.5px solid #e0e6e3;border-radius:10px;font-family:'Instrument Sans',sans-serif;font-size:15px;color:#111c18;background:#fafcfb;outline:none;transition:border 0.2s,box-shadow 0.2s;-webkit-appearance:none;appearance:none;}
+.f-input:focus{border-color:#0d9b6c;box-shadow:0 0 0 3px rgba(13,155,108,0.15);background:#fff;}
+.btn-activate{width:100%;padding:15px;background:#0d9b6c;color:#fff;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;cursor:pointer;margin-top:6px;letter-spacing:-0.2px;transition:background 0.2s,transform 0.1s;box-shadow:0 4px 20px rgba(13,155,108,0.35);}
+.btn-activate:active{transform:scale(0.98);}
+.btn-activate:hover{background:#0a7a54;}
+.pills{display:flex;gap:7px;margin-top:18px;flex-wrap:wrap;}
+.pill{padding:5px 11px;background:#e6f7f1;border-radius:100px;font-size:11px;font-weight:600;color:#0a7a54;}
+#loginErr{display:none;margin-top:12px;padding:11px 13px;background:#fdf0f0;border:1px solid #f5c5c5;border-radius:8px;color:#e02b2b;font-size:13px;}
+
+/* DASHBOARD */
+#dashScreen{padding-bottom:80px;}
+.dash-hdr{background:linear-gradient(135deg,#0a1f18,#0d3328);padding:20px 20px 24px;}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.hdr-brand{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#fff;}
+.hdr-brand span{color:#5deabc;}
+.active-badge{background:rgba(13,155,108,0.25);border:1px solid rgba(93,234,188,0.35);color:#5deabc;font-size:10px;font-weight:600;padding:4px 10px;border-radius:100px;}
+.rider-name{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;}
+.rider-meta{display:flex;align-items:center;gap:7px;color:rgba(255,255,255,0.5);font-size:12px;}
+.dot{width:3px;height:3px;background:rgba(255,255,255,0.3);border-radius:50%;}
+
+.nav-tabs{display:flex;background:#fff;border-bottom:1px solid #e0e6e3;position:sticky;top:0;z-index:10;}
+.nav-tab{flex:1;padding:12px 4px 10px;text-align:center;font-size:10px;font-weight:600;color:#6b7c76;cursor:pointer;border-bottom:2.5px solid transparent;transition:all 0.2s;user-select:none;}
+.nav-tab .ti{display:block;font-size:17px;margin-bottom:2px;}
+.nav-tab.active{color:#0d9b6c;border-bottom-color:#0d9b6c;}
+
+.tab-pane{display:none;padding:15px;}
+.tab-pane.active{display:block;}
+
+.card{background:#fff;border:1px solid #e0e6e3;border-radius:14px;padding:15px;margin-bottom:11px;box-shadow:0 2px 16px rgba(0,0,0,0.06);}
+.card-title{font-size:10px;font-weight:600;color:#6b7c76;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;}
+
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px;}
+.mcard{background:#fff;border:1px solid #e0e6e3;border-radius:12px;padding:13px;box-shadow:0 2px 10px rgba(0,0,0,0.05);}
+.ml{font-size:10px;color:#6b7c76;font-weight:500;margin-bottom:5px;}
+.mv{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;color:#111c18;line-height:1;}
+.mv.green{color:#0d9b6c;}.mv.amber{color:#ba7517;}
+.ms{font-size:9px;color:#6b7c76;margin-top:2px;}
+
+.score-card{background:#fff;border:1px solid #e0e6e3;border-radius:14px;padding:20px;margin-bottom:11px;box-shadow:0 2px 16px rgba(0,0,0,0.06);border-top:3px solid #0d9b6c;transition:border-top-color 0.4s;}
+.score-card.danger{border-top-color:#e24b4a;}
+.slbl{font-size:10px;font-weight:600;color:#6b7c76;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;}
+.smain{display:flex;align-items:flex-end;gap:12px;margin-bottom:13px;}
+.snum{font-family:'Syne',sans-serif;font-size:54px;font-weight:800;line-height:1;color:#0d9b6c;transition:color 0.4s;letter-spacing:-2px;}
+.snum.danger{color:#e24b4a;}
+.spill{padding:4px 11px;border-radius:100px;font-size:11px;font-weight:700;margin-bottom:7px;display:inline-flex;align-items:center;gap:4px;}
+.spill.safe{background:#e6f7f1;color:#0a7a54;}
+.spill.alert{background:#fdf0f0;color:#e24b4a;}
+.sstats{display:flex;gap:16px;}
+.sstat-lbl{font-size:9px;color:#6b7c76;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;}
+.sstat-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:#111c18;}
+.pstrip{margin-top:13px;padding:11px 13px;background:#fdf0f0;border-radius:9px;display:flex;align-items:center;justify-content:space-between;}
+.pstrip.hidden{display:none;}
+.ps-lbl{font-size:11px;color:#6b7c76;}
+.ps-amt{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:#e24b4a;}
+
+.notif{padding:13px 15px;background:#0d9b6c;border-radius:11px;margin-bottom:11px;color:#fff;font-size:13px;font-weight:600;display:none;align-items:center;gap:9px;animation:slideIn 0.3s ease;}
+.notif.show{display:flex;}
+.notif.err{background:#e24b4a;}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+.btn{width:100%;padding:14px;border:none;border-radius:11px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:9px;transition:all 0.2s;letter-spacing:-0.2px;}
+.btn:active{transform:scale(0.98);}
+.btn-green{background:#0d9b6c;color:#fff;box-shadow:0 4px 16px rgba(13,155,108,0.3);}
+.btn-green:hover{background:#0a7a54;}
+.btn-outline{background:#fff;color:#111c18;border:1.5px solid #e0e6e3;}
+.btn-outline:hover{border-color:#0d9b6c;color:#0d9b6c;}
+
+.risk-row{margin-bottom:15px;}
+.risk-hdr{display:flex;justify-content:space-between;margin-bottom:5px;}
+.risk-name{font-size:12px;font-weight:600;color:#111c18;}
+.risk-val{font-family:'DM Mono',monospace;font-size:11px;color:#6b7c76;}
+.pbar{height:7px;background:#eef1ef;border-radius:100px;overflow:hidden;}
+.pfill{height:100%;border-radius:100px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);}
+.fill-g{background:#0d9b6c;}.fill-a{background:#f0a52a;}.fill-r{background:#e24b4a;}
+
+.formula-box{background:#0a1f18;border-radius:10px;padding:13px 15px;margin-top:14px;}
+.flbl{font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;}
+.ftxt{font-family:'DM Mono',monospace;font-size:12px;color:#5deabc;line-height:1.7;}
+
+.wallet-hero{text-align:center;padding:22px 0 15px;}
+.wamt{font-family:'Syne',sans-serif;font-size:50px;font-weight:800;color:#0d9b6c;letter-spacing:-2px;line-height:1;}
+.wlbl{font-size:11px;color:#6b7c76;margin-top:3px;}
+.pi-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid #e0e6e3;}
+.pi-row:last-child{border-bottom:none;}
+.pi-k{font-size:12px;color:#6b7c76;}
+.pi-v{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:#111c18;}
+.tx-item{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #e0e6e3;}
+.tx-item:last-child{border-bottom:none;}
+.tx-ico{width:35px;height:35px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.tx-ico.cr{background:#e6f7f1;}.tx-ico.dr{background:#fdf0f0;}
+.tx-t{font-size:12px;font-weight:600;color:#111c18;}
+.tx-d{font-size:10px;color:#6b7c76;margin-top:1px;}
+.tx-a{font-family:'DM Mono',monospace;font-size:13px;font-weight:600;}
+.tx-a.cr{color:#0d9b6c;}.tx-a.dr{color:#e24b4a;}
+
+.pr-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #e0e6e3;gap:10px;}
+.pr-row:last-child{border-bottom:none;}
+.pr-k{font-size:11px;color:#6b7c76;flex:1;}
+.pr-v{font-size:12px;font-weight:600;color:#111c18;text-align:right;flex:1.2;}
+.chk-item{display:flex;align-items:flex-start;gap:9px;padding:7px 0;font-size:12px;color:#111c18;line-height:1.4;}
+.chk-ico{width:19px;height:19px;background:#e6f7f1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px;color:#0a7a54;}
+.dark-card{background:#0a1f18;border-radius:14px;padding:15px;margin-bottom:11px;}
+.dark-card .card-title{color:rgba(255,255,255,0.35);}
+.dark-card p{font-size:12px;color:rgba(255,255,255,0.65);line-height:1.6;}
+
+.refresh-btn{display:inline-flex;align-items:center;gap:5px;background:#e6f7f1;color:#0a7a54;border:none;padding:7px 13px;border-radius:100px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:12px;transition:all 0.2s;}
+.refresh-btn:hover{background:#0d9b6c;color:#fff;}
+.spin-ico{display:inline-block;}
+.spinning .spin-ico{animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.last-ref{font-size:10px;color:#6b7c76;text-align:center;margin-top:4px;}
+
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;}
+.sec-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#111c18;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="screen active">
+  <div class="login-top">
+    <div class="brand-row">
+      <div class="brand-ico">🛡</div>
+      <div class="brand-txt">Shift<span>Shield</span></div>
+    </div>
+    <div class="hero-h">Protect your<br/><em>income, always.</em></div>
+    <div class="hero-s">AI micro-insurance for gig riders.<br/>Zero forms. Instant payouts.</div>
+  </div>
+  <div class="login-form">
+    <div class="f-title">Create your policy</div>
+    <div class="f-group">
+      <label class="f-label">📱 Phone Number</label>
+      <input type="tel" id="phoneInput" class="f-input" placeholder="e.g. 9876543210" maxlength="10"/>
+    </div>
+    <div class="f-group">
+      <label class="f-label">📍 City</label>
+      <select id="cityInput" class="f-input">
+        <option value="Coimbatore">Coimbatore</option>
+        <option value="Chennai">Chennai</option>
+        <option value="Bengaluru">Bengaluru</option>
+        <option value="Pune">Pune</option>
+      </select>
+    </div>
+    <div class="f-group">
+      <label class="f-label">🏍 Platform</label>
+      <select id="platformInput" class="f-input">
+        <option value="Swiggy">Swiggy</option>
+        <option value="Zomato">Zomato</option>
+      </select>
+    </div>
+    <button class="btn-activate" onclick="signup()">Activate ShiftShield →</button>
+    <div id="loginErr"></div>
+    <div class="pills">
+      <div class="pill">⚡ Instant activation</div>
+      <div class="pill">🌧 Rain coverage</div>
+      <div class="pill">🤖 Auto payouts</div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD SCREEN -->
+<div id="dashScreen" class="screen">
+  <div class="dash-hdr">
+    <div class="hdr-top">
+      <div class="hdr-brand">Shift<span>Shield</span></div>
+      <div class="active-badge">● ACTIVE</div>
+    </div>
+    <div class="rider-name" id="riderName">Rider</div>
+    <div class="rider-meta">
+      <span id="riderCity">—</span><div class="dot"></div>
+      <span id="riderPlatform">—</span><div class="dot"></div>
+      <span id="riderPid" style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,0.35);">—</span>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="nav-tab active" id="tab-home" onclick="showTab('home',this)"><span class="ti">🏠</span>Home</div>
+    <div class="nav-tab" id="tab-risk" onclick="showTab('risk',this)"><span class="ti">⚡</span>Live Risk</div>
+    <div class="nav-tab" id="tab-wallet" onclick="showTab('wallet',this)"><span class="ti">💰</span>Wallet</div>
+    <div class="nav-tab" id="tab-policy" onclick="showTab('policy',this)"><span class="ti">📋</span>Policy</div>
+  </div>
+
+  <!-- HOME TAB -->
+  <div class="tab-pane active" id="pane-home">
+    <div class="mgrid">
+      <div class="mcard"><div class="ml">Wallet Balance</div><div class="mv green" id="h-wallet">₹0</div><div class="ms">Available</div></div>
+      <div class="mcard"><div class="ml">Weekly Premium</div><div class="mv" id="h-premium">₹—</div><div class="ms">Auto-deducted</div></div>
+      <div class="mcard"><div class="ml">Protected Hours</div><div class="mv amber">18<span style="font-size:12px;color:#6b7c76">/25</span></div><div class="ms">This week</div></div>
+      <div class="mcard"><div class="ml">Events Covered</div><div class="mv" style="color:#7b5ea7" id="h-events">2</div><div class="ms">This month</div></div>
+    </div>
+
+    <div class="notif" id="notif"><span id="notifIcon">✅</span><span id="notifTxt">—</span></div>
+
+    <div class="score-card" id="scoreCard">
+      <div class="slbl">Disruption Score</div>
+      <div class="smain">
+        <div class="snum" id="scoreNum">—</div>
+        <div><div class="spill safe" id="scorePill">● SAFE</div></div>
+      </div>
+      <div class="sstats">
+        <div><div class="sstat-lbl">Rain</div><div class="sstat-val" id="rainVal">—mm</div></div>
+        <div><div class="sstat-lbl">Temp</div><div class="sstat-val" id="tempVal">—°C</div></div>
+        <div><div class="sstat-lbl">Condition</div><div class="sstat-val" id="condVal" style="font-size:11px;max-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div></div>
+      </div>
+      <div class="pstrip hidden" id="payoutStrip">
+        <div><div class="ps-lbl">Eligible payout</div><div class="ps-amt" id="payoutAmt">₹0</div></div>
+        <span style="font-size:20px;">⚠️</span>
+      </div>
+    </div>
+
+    <button class="btn btn-green" id="claimBtn" onclick="triggerClaim()">🔍 Trigger Claim Check</button>
+    <button class="btn btn-outline" onclick="logout()">🚪 Logout</button>
+    <div class="last-ref" id="lastRef">Auto-refreshes every 30s</div>
+  </div>
+
+  <!-- RISK TAB -->
+  <div class="tab-pane" id="pane-risk">
+    <div class="sec-hdr">
+      <div class="sec-title">Live Risk Indicators</div>
+      <button class="refresh-btn" id="refreshBtn" onclick="refreshRisk()"><span class="spin-ico">↻</span> Refresh</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Environmental Factors</div>
+      <div class="risk-row">
+        <div class="risk-hdr"><div class="risk-name">🌧 Rainfall Intensity</div><div class="risk-val" id="r-rainPct">0%</div></div>
+        <div class="pbar"><div class="pfill fill-g" id="r-rainBar" style="width:0%"></div></div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-hdr"><div class="risk-name">🌡 Temperature</div><div class="risk-val" id="r-tempPct">0%</div></div>
+        <div class="pbar"><div class="pfill fill-g" id="r-tempBar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Platform Factors</div>
+      <div class="risk-row">
+        <div class="risk-hdr"><div class="risk-name">📡 Platform Availability</div><div class="risk-val">95%</div></div>
+        <div class="pbar"><div class="pfill fill-g" style="width:95%"></div></div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-hdr"><div class="risk-name">📦 Order Volume</div><div class="risk-val" id="r-orderPct">—%</div></div>
+        <div class="pbar"><div class="pfill fill-a" id="r-orderBar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="formula-box">
+      <div class="flbl">Disruption Score Formula</div>
+      <div class="ftxt" id="formulaTxt">Score = (rain × 0.7) + (heat × 0.3)<br/>= — × 0.7 + — × 0.3<br/>= <span style="color:#fff;font-weight:500">—</span></div>
+    </div>
+  </div>
+
+  <!-- WALLET TAB -->
+  <div class="tab-pane" id="pane-wallet">
+    <div class="wallet-hero">
+      <div class="wamt" id="wAmt">₹0</div>
+      <div class="wlbl">Wallet Balance</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Policy Overview</div>
+      <div class="pi-row"><div class="pi-k">Policy ID</div><div class="pi-v" id="w-pid">—</div></div>
+      <div class="pi-row"><div class="pi-k">Coverage Cap</div><div class="pi-v" id="w-cov">—</div></div>
+      <div class="pi-row"><div class="pi-k">Weekly Premium</div><div class="pi-v" id="w-prem">—</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recent Transactions</div>
+      <div id="txList">
+        <div class="tx-item">
+          <div class="tx-ico dr">📤</div>
+          <div style="flex:1"><div class="tx-t">Premium Deducted</div><div class="tx-d">Policy Activation</div></div>
+          <div class="tx-a dr" id="txPremium">—</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-outline" onclick="alert('UPI withdrawal coming in v2!')">🏦 Withdraw via UPI (Demo)</button>
+  </div>
+
+  <!-- POLICY TAB -->
+  <div class="tab-pane" id="pane-policy">
+    <div class="card">
+      <div class="card-title">Policy Details</div>
+      <div class="pr-row"><div class="pr-k">Policy ID</div><div class="pr-v" id="p-pid" style="font-family:'DM Mono',monospace;font-size:11px;">—</div></div>
+      <div class="pr-row"><div class="pr-k">Period</div><div class="pr-v">Weekly, auto-renew</div></div>
+      <div class="pr-row"><div class="pr-k">Protected Hours</div><div class="pr-v">25 hrs / week</div></div>
+      <div class="pr-row"><div class="pr-k">Shift Windows</div><div class="pr-v">12–3 PM & 7–11 PM</div></div>
+      <div class="pr-row"><div class="pr-k">Premium</div><div class="pr-v" id="p-prem">—</div></div>
+      <div class="pr-row"><div class="pr-k">Coverage Cap</div><div class="pr-v" id="p-cov">—</div></div>
+      <div class="pr-row"><div class="pr-k">Zone</div><div class="pr-v" id="p-zone">—</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Covered Triggers</div>
+      <div class="chk-item"><div class="chk-ico">✓</div>Heavy rain + restaurant shutdown</div>
+      <div class="chk-item"><div class="chk-ico">✓</div>Platform outage (45+ minutes)</div>
+      <div class="chk-item"><div class="chk-ico">✓</div>Demand crash (40%+ order drop)</div>
+      <div class="chk-item"><div class="chk-ico">✓</div>Heatwave / extreme fog conditions</div>
+    </div>
+    <div class="dark-card">
+      <div class="card-title">How Payouts Work</div>
+      <p>When the Disruption Score exceeds <strong style="color:#5deabc">0.40</strong>, your claim auto-triggers. No paperwork. Payout lands instantly in your wallet. Max payout per event: <strong style="color:#5deabc">₹900</strong>.</p>
+    </div>
+  </div>
+
+</div><!-- /dashScreen -->
+</div><!-- /app -->
+
+<script>
+var S = {
+  phone:'', city:'', platform:'', pid:'', premium:0, coverage:0,
+  wallet:0, rain:0, temp:0, cond:'', score:0, payout:0, triggered:false,
+  events:2, timer:null
+};
+
+var CITIES = {
+  Coimbatore: {premium:120, zone:'Gandhipuram & RS Puram', rain:18.5, temp:36.2, cond:'heavy intensity rain'},
+  Chennai:    {premium:140, zone:'T. Nagar & Anna Nagar',  rain:8.2,  temp:38.9, cond:'moderate rain'},
+  Bengaluru:  {premium:130, zone:'Koramangala & Indiranagar', rain:4.0, temp:32.1, cond:'light rain'},
+  Pune:       {premium:125, zone:'Viman Nagar & Baner',    rain:0.5,  temp:41.5, cond:'haze'}
+};
+
+function signup() {
+  var phone = document.getElementById('phoneInput').value.trim();
+  var city  = document.getElementById('cityInput').value;
+  var plat  = document.getElementById('platformInput').value;
+  var err   = document.getElementById('loginErr');
+  if (!/^\d{10}$/.test(phone)) {
+    err.textContent = 'Enter a valid 10-digit phone number.';
+    err.style.display = 'block'; return;
+  }
+  err.style.display = 'none';
+  var d = CITIES[city];
+  var num = Math.floor(Math.random()*9000)+1000;
+  S.phone = phone; S.city = city; S.platform = plat;
+  S.premium = d.premium; S.coverage = d.premium * 20;
+  S.pid = 'SS-2026-' + city.slice(0,3).toUpperCase() + '-' + num;
+  S.rain = d.rain; S.temp = d.temp; S.cond = d.cond;
+  computeScore();
+  setupDash();
+  goTo('dashScreen');
+  showTab('home', document.getElementById('tab-home'));
+  updateScoreUI();
+  if (S.timer) clearInterval(S.timer);
+  S.timer = setInterval(autoRefresh, 30000);
+}
+
+function computeScore() {
+  var rs = Math.min(S.rain / 30, 1.0);
+  var hs = Math.max((S.temp - 38) / 8, 0);
+  S.score = Math.round((rs * 0.7 + hs * 0.3) * 100) / 100;
+  S.triggered = S.score > 0.4;
+  S.payout = S.triggered ? Math.round(S.score * 900) : 0;
+}
+
+function setupDash() {
+  var d = CITIES[S.city];
+  document.getElementById('riderName').textContent     = 'Rider #' + S.phone.slice(-4);
+  document.getElementById('riderCity').textContent     = S.city;
+  document.getElementById('riderPlatform').textContent = S.platform;
+  document.getElementById('riderPid').textContent      = S.pid;
+  document.getElementById('h-premium').textContent     = '₹' + S.premium;
+  document.getElementById('p-pid').textContent         = S.pid;
+  document.getElementById('p-prem').textContent        = '₹' + S.premium + '/week';
+  document.getElementById('p-cov').textContent         = '₹' + S.coverage;
+  document.getElementById('p-zone').textContent        = d.zone;
+  document.getElementById('w-pid').textContent         = S.pid;
+  document.getElementById('w-cov').textContent         = '₹' + S.coverage;
+  document.getElementById('w-prem').textContent        = '₹' + S.premium + '/week';
+  document.getElementById('txPremium').textContent     = '-₹' + S.premium;
+}
+
+function updateScoreUI() {
+  var sc  = document.getElementById('scoreCard');
+  var sn  = document.getElementById('scoreNum');
+  var sp  = document.getElementById('scorePill');
+  var ps  = document.getElementById('payoutStrip');
+  sn.textContent = S.score.toFixed(2);
+  document.getElementById('rainVal').textContent = S.rain + 'mm';
+  document.getElementById('tempVal').textContent = S.temp.toFixed(1) + '°C';
+  document.getElementById('condVal').textContent = S.cond;
+  if (S.triggered) {
+    sn.className = 'snum danger';
+    sp.textContent = '⚠ ALERT'; sp.className = 'spill alert';
+    sc.className = 'score-card danger';
+    ps.className = 'pstrip';
+    document.getElementById('payoutAmt').textContent = '₹' + S.payout;
+  } else {
+    sn.className = 'snum';
+    sp.textContent = '● SAFE'; sp.className = 'spill safe';
+    sc.className = 'score-card';
+    ps.className = 'pstrip hidden';
+  }
+  document.getElementById('h-wallet').textContent = '₹' + S.wallet;
+  document.getElementById('wAmt').textContent     = '₹' + S.wallet;
+  document.getElementById('lastRef').textContent  = 'Last refresh: ' + new Date().toLocaleTimeString();
+  updateRiskBars();
+}
+
+function updateRiskBars() {
+  var rp = Math.min((S.rain / 45) * 100, 100);
+  var tp = Math.min(Math.max(((S.temp - 25) / 20) * 100, 0), 100);
+  var op = Math.floor(Math.random() * 30) + 30;
+  document.getElementById('r-rainPct').textContent = Math.round(rp) + '%';
+  var rb = document.getElementById('r-rainBar');
+  rb.style.width = rp + '%';
+  rb.className = 'pfill ' + (rp > 66 ? 'fill-r' : rp > 33 ? 'fill-a' : 'fill-g');
+  document.getElementById('r-tempPct').textContent = Math.round(tp) + '%';
+  var tb = document.getElementById('r-tempBar');
+  tb.style.width = tp + '%';
+  tb.className = 'pfill ' + (S.temp > 40 ? 'fill-r' : tp > 33 ? 'fill-a' : 'fill-g');
+  document.getElementById('r-orderPct').textContent = op + '%';
+  document.getElementById('r-orderBar').style.width = op + '%';
+  var rs = Math.min(S.rain / 30, 1.0).toFixed(2);
+  var hs = Math.max((S.temp - 38) / 8, 0).toFixed(2);
+  document.getElementById('formulaTxt').innerHTML =
+    'Score = (rain \u00d7 0.7) + (heat \u00d7 0.3)<br/>= ' + rs +
+    ' \u00d7 0.7 + ' + hs + ' \u00d7 0.3<br/>= <span style="color:#fff;font-weight:500">' +
+    S.score.toFixed(2) + '</span>';
+}
+
+function triggerClaim() {
+  var btn = document.getElementById('claimBtn');
+  btn.disabled = true; btn.textContent = '⏳ Checking...';
+  setTimeout(function() {
+    var notif = document.getElementById('notif');
+    var ntxt  = document.getElementById('notifTxt');
+    var nico  = document.getElementById('notifIcon');
+    if (S.triggered) {
+      S.wallet += S.payout; S.events++;
+      document.getElementById('h-events').textContent = S.events;
+      updateScoreUI();
+      ntxt.textContent = '₹' + S.payout + ' credited to your wallet!';
+      notif.className = 'notif show'; nico.textContent = '✅';
+      addTx(S.payout);
+    } else {
+      ntxt.textContent = 'Score ' + S.score.toFixed(2) + ' — threshold not reached (need >0.40)';
+      notif.className = 'notif show err'; nico.textContent = 'ℹ️';
+    }
+    notif.style.display = 'flex';
+    setTimeout(function() { notif.style.display = 'none'; }, 6000);
+    btn.disabled = false; btn.textContent = '🔍 Trigger Claim Check';
+  }, 1200);
+}
+
+function addTx(amount) {
+  var list = document.getElementById('txList');
+  var now  = new Date().toLocaleDateString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  var div  = document.createElement('div'); div.className = 'tx-item';
+  div.innerHTML = '<div class="tx-ico cr">📥</div><div style="flex:1"><div class="tx-t">Disruption Payout</div><div class="tx-d">' + now + '</div></div><div class="tx-a cr">+₹' + amount + '</div>';
+  list.insertBefore(div, list.firstChild);
+}
+
+function autoRefresh() {
+  S.rain = parseFloat(Math.max(0, S.rain + (Math.random() - 0.5) * 2).toFixed(1));
+  S.temp = parseFloat((S.temp + (Math.random() - 0.4) * 0.3).toFixed(1));
+  computeScore();
+  updateScoreUI();
+}
+
+function refreshRisk() {
+  var btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  autoRefresh();
+  setTimeout(function() { btn.classList.remove('spinning'); }, 800);
+}
+
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t)  { t.classList.remove('active'); });
+  document.getElementById('pane-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'risk') updateRiskBars();
+}
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function logout() {
+  if (S.timer) clearInterval(S.timer);
+  S = {phone:'',city:'',platform:'',pid:'',premium:0,coverage:0,wallet:0,rain:0,temp:0,cond:'',score:0,payout:0,triggered:false,events:2,timer:null};
+  document.getElementById('phoneInput').value = '';
+  goTo('loginScreen');
+}
+</script>
+</body>
+</html>
